@@ -12,6 +12,7 @@
 
 namespace App\Controller;
 
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -20,7 +21,7 @@ use Symfony\Component\Routing\Annotation\Route;
  *
  * @package App\Controller
  */
-class DefaultController
+class DefaultController extends AbstractController
 {
 
     /**
@@ -31,7 +32,14 @@ class DefaultController
     public function index(string $nombre = null): Response
     {
         $sujeto = $nombre ?? 'MiW';
-        return new Response("Buenas tardes querid@ $nombre!!!");
+        $vector = [1, 2, 3, 4, 5];
+        return $this->render(
+            'Default/index.html.twig',
+            [
+                'persona' => $sujeto,
+                'datos' => $vector
+            ]
+        );
     }
 
     /**
