@@ -13,6 +13,7 @@
 namespace App\Controller;
 
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * Class DefaultController
@@ -23,14 +24,20 @@ class DefaultController
 {
 
     /**
+     * @Route(path="/saluda/{nombre}", name="index")
      * index
      * @return Response
      */
-    public function index(): Response
+    public function index(string $nombre = null): Response
     {
-        return new Response('Buenas tardes querido MiW!!!');
+        $sujeto = $nombre ?? 'MiW';
+        return new Response("Buenas tardes querid@ $nombre!!!");
     }
 
+    /**
+     * @Route(path="/adios", name="dile_adios", methods={ "GET" })
+     * @return Response
+     */
     public function despidete(): Response
     {
         return new Response('Hasta luego!!!');
