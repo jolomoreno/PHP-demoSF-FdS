@@ -14,6 +14,7 @@ namespace App\Controller;
 
 use App\Entity\Persona;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -22,13 +23,13 @@ use Symfony\Component\Routing\Annotation\Route;
  *
  * @package App\Controller
  *
- * @Route(path="/persona")
+ * @Route(path="/aux/persona", name="aux_persona_")
  */
 class PersonaController extends AbstractController
 {
 
     /**
-     * @Route(path="", name="persona_index")
+     * @Route(path="", name="index")
      * @return Response
      */
     public function index(): Response
@@ -40,6 +41,41 @@ class PersonaController extends AbstractController
         return $this->render(
             'Persona/index.html.twig',
             [ 'personas' => $personas ]
+        );
+    }
+
+    /**
+     * @Route(path="/json", name="listado_json", methods={ "GET" })
+     * @return Response
+     */
+    public function listadoJSON(): JsonResponse
+    {
+        $em = $this->getDoctrine()->getManager();
+        /** @var Persona[] $personas */
+        $personas = $em->getRepository(Persona::class)->findAll();
+        return new JsonResponse(
+            [ 'personas' => $personas ]
+        );
+    }
+
+    /**
+     * Nueva Persona
+     *
+     * @Route("/nueva", name="nueva")
+     * @return Response
+     * @throws \Exception
+     */
+    public function nuevaPersona(): Response
+    {
+        $num = random_int(0, 10E6);
+        $persona = new Persona($num, 'Nombre_' . $num, $num . '@xyz.com');
+        $em = $this->getDoctrine()->getManager();
+        $em->persist($persona);
+        $em->flush();
+
+        return $this->render(
+            'Persona/nueva.html.twig',
+            ['persona' => $persona ]
         );
     }
 }

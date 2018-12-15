@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="personal")
  * @ORM\Entity
  */
-class Persona
+class Persona implements \JsonSerializable
 {
     /**
      * @var int
@@ -40,7 +40,7 @@ class Persona
      * @param string|null $nombre
      * @param string|null $email
      */
-    public function __construct(int $dni, ?string $nombre, ?string $email)
+    public function __construct(int $dni = 0, ?string $nombre = null, ?string $email = null)
     {
         $this->dni = $dni;
         $this->nombre = $nombre;
@@ -101,4 +101,21 @@ class Persona
         return $this;
     }
 
+    /**
+     * Specify data which should be serialized to JSON
+     * @link https://php.net/manual/en/jsonserializable.jsonserialize.php
+     * @return mixed data which can be serialized by <b>json_encode</b>,
+     * which is a value of any type other than a resource.
+     * @since 5.4.0
+     */
+    public function jsonSerialize()
+    {
+        return [
+            'persona' => [
+                'nombre' => $this->getNombre(),
+                'dni' => $this->getDni(),
+                'e-mail' => $this->getEmail()
+            ]
+        ];
+    }
 }
