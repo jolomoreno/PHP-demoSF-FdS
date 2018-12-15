@@ -1,81 +1,93 @@
 <?php
-/**
- * PHP version 7.2
- * demoSF_FdS - PersonaController.php
- *
- * @author   Javier Gil <franciscojavier.gil@upm.es>
- * @license  https://opensource.org/licenses/MIT MIT License
- * @link     http://www.etsisi.upm.es ETS de Ingeniería de Sistemas Informáticos
- * Date: 14/12/2018
- * Time: 20:53
- */
 
 namespace App\Controller;
 
 use App\Entity\Persona;
+use App\Form\PersonaType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * Class PersonaController
- *
- * @package App\Controller
- *
- * @Route(path="/aux/persona", name="aux_persona_")
+ * @Route("/persona")
  */
 class PersonaController extends AbstractController
 {
-
     /**
-     * @Route(path="", name="index")
-     * @return Response
+     * @Route("/", name="persona_index", methods={"GET"})
      */
     public function index(): Response
     {
-        $em = $this->getDoctrine()->getManager();
-        /** @var Persona[] $personas */
-        $personas = $em->getRepository(Persona::class)->findAll();
+        $personas = $this->getDoctrine()
+            ->getRepository(Persona::class)
+            ->findAll();
 
-        return $this->render(
-            'Persona/index.html.twig',
-            [ 'personas' => $personas ]
-        );
+        return $this->render('persona/index.html.twig', ['personas' => $personas]);
     }
 
     /**
-     * @Route(path="/json", name="listado_json", methods={ "GET" })
-     * @return Response
+     * @Route("/new", name="persona_new", methods={"GET","POST"})
      */
-    public function listadoJSON(): JsonResponse
+    public function new(Request $request): Response
     {
-        $em = $this->getDoctrine()->getManager();
-        /** @var Persona[] $personas */
-        $personas = $em->getRepository(Persona::class)->findAll();
-        return new JsonResponse(
-            [ 'personas' => $personas ]
-        );
+        $persona = new Persona();
+        $form = $this->createForm(PersonaType::class, $persona);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->persist($persona);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('persona_index');
+        }
+
+        return $this->render('persona/new.html.twig', [
+            'persona' => $persona,
+            'form' => $form->createView(),
+        ]);
     }
 
     /**
-     * Nueva Persona
-     *
-     * @Route("/nueva", name="nueva")
-     * @return Response
-     * @throws \Exception
+     * @Route("/{dni}", name="persona_show", methods={"GET"})
      */
-    public function nuevaPersona(): Response
+    public function show(Persona $persona): Response
     {
-        $num = random_int(0, 10E6);
-        $persona = new Persona($num, 'Nombre_' . $num, $num . '@xyz.com');
-        $em = $this->getDoctrine()->getManager();
-        $em->persist($persona);
-        $em->flush();
+        return $this->render('persona/show.html.twig', ['persona' => $persona]);
+    }
 
-        return $this->render(
-            'Persona/nueva.html.twig',
-            ['persona' => $persona ]
-        );
+    /**
+     * @Route("/{dni}/edit", name="persona_edit", methods={"GET","POST"})
+     */
+    public function edit(Request $request, Persona $persona): Response
+    {
+        $form = $this->createForm(PersonaType::class, $persona);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->getDoctrine()->getManager()->flush();
+
+            return $this->redirectToRoute('persona_index', ['dni' => $persona->getDni()]);
+        }
+
+        return $this->render('persona/edit.html.twig', [
+            'persona' => $persona,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /**
+     * @Route("/{dni}", name="persona_delete", methods={"DELETE"})
+     */
+    public function delete(Request $request, Persona $persona): Response
+    {
+        if ($this->isCsrfTokenValid('delete'.$persona->getDni(), $request->request->get('_token'))) {
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->remove($persona);
+            $entityManager->flush();
+        }
+
+        return $this->redirectToRoute('persona_index');
     }
 }
