@@ -15,32 +15,34 @@ class Persona implements \JsonSerializable
     /**
      * @var int
      *
-     * @ORM\Column(name="dni", type="integer", nullable=false)
+     * @ORM\Column(name="id", type="integer", nullable=false, options={"unsigned"=true})
      * @ORM\Id
+     * @ORM\GeneratedValue(strategy="IDENTITY")
+     */
+    private $id;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="dni", type="string", length=70, nullable=false)
      */
     private $dni;
 
     /**
      * @var string|null
      *
-     * @ORM\Column(name="nombre", type="string", length=75, nullable=true)
+     * @ORM\Column(name="nombre", type="string", length=70, nullable=true)
      */
     private $nombre;
 
     /**
      * @var string|null
      *
-     * @ORM\Column(name="email", type="string", length=45, nullable=true)
+     * @ORM\Column(name="email", type="string", length=70, nullable=true)
      */
     private $email;
 
-    /**
-     * Persona constructor.
-     * @param int $dni
-     * @param string|null $nombre
-     * @param string|null $email
-     */
-    public function __construct(int $dni = 0, ?string $nombre = null, ?string $email = null)
+    public function __construct(string $dni = "", ?string $nombre = null, ?string $email = null)
     {
         $this->dni = $dni;
         $this->nombre = $nombre;
@@ -50,7 +52,7 @@ class Persona implements \JsonSerializable
     /**
      * @return int
      */
-    public function getDni(): int
+    public function getDni(): string
     {
         return $this->dni;
     }
@@ -59,7 +61,7 @@ class Persona implements \JsonSerializable
      * @param int $dni
      * @return Persona
      */
-    public function setDni(int $dni): Persona
+    public function setDni(string $dni): Persona
     {
         $this->dni = $dni;
         return $this;
